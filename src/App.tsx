@@ -1,35 +1,77 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react';
+import './App.css';
+import axios from 'axios';
+import { InputForm } from './components/InputForm';
+import { GameList } from './components/GameList';
+import { GameEdit } from './components/GameEdit';
 
-function App() {
-  const [count, setCount] = useState(0)
+export type Game = {
+  id: number,
+  image: string,
+  title: string,
+  genre: string,
+  description: string,
+  rating: string,
+};
+
+function App(): JSX.Element {
+  const [games, setGames] = useState<Game[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+
+  useEffect((): void => {
+    axios.get('http://localhost:3001/games')
+    .then((response) => {
+      setGames(response.data);
+    });
+  }, []);
+
+  const handleEditClick = (game: Game): void => {
+    setIsEditing(true);
+    setSelectedGame(game);
+  };
+
+  const addGame = (newGame: Game): void => {
+    axios.post('http://localhost:3001/games', newGame)
+    .then(() => {
+      const updatedGameList = [...games, newGame];
+      setGames(updatedGameList)
+    });
+  };
+
+  const handleDelete = (gameDelete: Game): void => {
+    
+    axios.delete(`http://localhost:3001/games/${gameDelete.id}`)
+      .then((): void => {
+        const remainingGames = games.filter((game: Game): boolean => game.id !== gameDelete.id)
+        setGames(remainingGames);
+      });
+  };
+
+  const editGame = (editGame: Game): void => {
+    axios.patch(`http://localhost:3001/games/${editGame.id}`, editGame)
+      .then((response): void => {
+        console.log(response);
+        
+        const editedGame = games.map((game) => 
+          game.id === editGame.id ? {...game, ...editGame} : game
+        )
+        setGames(editedGame)
+      })
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <h1 className="header">Games to enjoy</h1>
+      <div className="games">
+        <div className="card-wrapper">
+          <GameList games={games} handleDelete={handleDelete} handleEditClick={handleEditClick}/>
+        </div>
+        <InputForm addGame={addGame} games={games} initialGames={{title: '', genre: '', description: '', rating: ''}} editGame={editGame}/>
+        {isEditing && <GameEdit game={selectedGame} editGame={editGame} addGame={addGame} games={games}/>}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
 export default App
