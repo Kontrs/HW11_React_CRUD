@@ -150,13 +150,13 @@ body {
 
 .edit-mode{
   display: flex;
-  flex-grow: 1;
+
   border-radius: 5px;
   padding: 10px 15px;
   border: none;
   background-color: rgb(143, 171, 255);
   color: black;
-  width: 100%;
+  width: 550px;
   text-align: center;
   &::placeholder {
     color: black;

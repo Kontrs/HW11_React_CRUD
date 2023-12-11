@@ -31,11 +31,11 @@ function App(): JSX.Element {
     setSelectedGame(game);
   };
 
-  const addGame = (newGame: Game): void => {
-    axios.post('http://localhost:3001/games', newGame)
+  const addGame = (newGame: Game) => {
+    axios.post('http://localhost:3001/game', newGame)
     .then(() => {
-      const updatedGameList = [...games, newGame];
-      setGames(updatedGameList)
+      axios.get('http://localhost:3001/games')
+      .then(response => setGames(response.data))
     });
   };
 
@@ -56,10 +56,12 @@ function App(): JSX.Element {
         const editedGame = games.map((game) => 
           game.id === editGame.id ? {...game, ...editGame} : game
         )
-        setGames(editedGame)
+        setGames(editedGame);
+        setIsEditing(false);
       })
   };
 
+  
   return (
     <>
       <h1 className="header">Games to enjoy</h1>
@@ -67,8 +69,8 @@ function App(): JSX.Element {
         <div className="card-wrapper">
           <GameList games={games} handleDelete={handleDelete} handleEditClick={handleEditClick}/>
         </div>
-        <InputForm addGame={addGame} games={games} initialGames={{title: '', genre: '', description: '', rating: ''}} editGame={editGame}/>
         {isEditing && <GameEdit game={selectedGame} editGame={editGame} addGame={addGame} games={games}/>}
+        <InputForm addGame={addGame} editGame={editGame}/>
       </div>
     </>
   );

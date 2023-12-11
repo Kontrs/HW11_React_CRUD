@@ -1,12 +1,19 @@
 import { useEffect, useState } from 'react';
 
-export const InputForm = ({addGame, initialGames, games, editGame}) => {
-  const [formValue, setFormValue] = useState(initialGames);
+
+const initValues = {title: '', genre: '', description: '', rating: ''}
+
+type InputFormProps = {
+  addGame: () => void,
+   editGame: (data: typeof initValues) => void
+} 
+
+export const InputForm = ({addGame, editGame}: InputFormProps) => {
+  const [formValue, setFormValue] = useState(initValues);
 
   useEffect(() => {
-    // Update formValue when initialGames changes (for editing)
-    setFormValue(initialGames);
-  }, [initialGames]);
+    setFormValue(initValues);
+  }, []);
 
   const handleInputChange = (event) => {
     const { id, value, type, checked } = event.target;
@@ -27,7 +34,7 @@ export const InputForm = ({addGame, initialGames, games, editGame}) => {
   const handleSubmit = (event: { preventDefault: () => void; }) => {
     event.preventDefault();
     const  newGame = {
-      id: games.length + 1,
+      image: 'src/assets/images/default-image.jpg',
       ...formValue
     }
     if (formValue.id) {
@@ -36,7 +43,7 @@ export const InputForm = ({addGame, initialGames, games, editGame}) => {
       addGame(newGame)
     }
     
-    setFormValue({ title: '', genre: '', description: '', rating: ''})
+    setFormValue(initValues)
   }
 
   return (
